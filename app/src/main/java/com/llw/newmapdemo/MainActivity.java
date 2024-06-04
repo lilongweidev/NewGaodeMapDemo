@@ -10,6 +10,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,6 +20,8 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.LocationSource;
 import com.llw.newmapdemo.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements AMapLocationListener {
@@ -26,11 +29,14 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     private ActivityMainBinding binding;
     // 请求权限意图
     private ActivityResultLauncher<String> requestPermission;
-    //声明AMapLocationClient类对象
+    // 声明AMapLocationClient类对象
     public AMapLocationClient mLocationClient = null;
-    //声明AMapLocationClientOption对象
+    // 声明AMapLocationClientOption对象
     public AMapLocationClientOption mLocationOption = null;
-
+    // 声明地图控制器
+    private AMap aMap = null;
+    // 声明地图定位监听
+    private LocationSource.OnLocationChangedListener mListener = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
@@ -48,6 +54,20 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         });
         // 初始化定位
         initLocation();
+        // 绑定生命周期 onCreate
+        binding.mapView.onCreate(savedInstanceState);
+        // 初始化地图
+        //initMap();
+    }
+
+    /**
+     * 初始化地图
+     */
+    private void initMap() {
+        if (aMap == null) {
+            aMap = binding.mapView.getMap();
+        }
+
     }
 
     /**
@@ -93,15 +113,37 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     @Override
     protected void onResume() {
         super.onResume();
+        // 绑定生命周期 onResume
+        binding.mapView.onResume();
         // 检查是否已经获取到定位权限
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // 获取到权限
-            showMsg("开始定位");
             startLocation();
         } else {
             // 请求定位权限
             requestPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 绑定生命周期 onPause
+        binding.mapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // 绑定生命周期 onSaveInstanceState
+        binding.mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 绑定生命周期 onDestroy
+        binding.mapView.onDestroy();
     }
 
     private void showMsg(CharSequence llw) {
@@ -139,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
 //            aMapLocation.getFloor();//获取当前室内定位的楼层
 //            aMapLocation.getGpsAccuracyStatus();//获取GPS的当前状态
 
-            binding.tvAddress.setText(result);
             // 停止定位
             stopLocation();
         } else {
