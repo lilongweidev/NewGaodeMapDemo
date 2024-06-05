@@ -2,6 +2,7 @@ package com.llw.newmapdemo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,9 +23,18 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.LocationSource;
+import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.services.core.AMapException;
+import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.poisearch.PoiResult;
+import com.amap.api.services.poisearch.PoiSearch;
 import com.llw.newmapdemo.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity implements AMapLocationListener {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements AMapLocationListener, LocationSource, PoiSearch.OnPoiSearchListener {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     // 请求权限意图
@@ -37,6 +47,13 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     private AMap aMap = null;
     // 声明地图定位监听
     private LocationSource.OnLocationChangedListener mListener = null;
+    //POI查询对象
+    private PoiSearch.Query query;
+    //POI搜索对象
+    private PoiSearch poiSearch;
+    //城市码
+    private String cityCode = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
@@ -57,7 +74,34 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         // 绑定生命周期 onCreate
         binding.mapView.onCreate(savedInstanceState);
         // 初始化地图
-        //initMap();
+        initMap();
+        // 初始化控件
+        initView();
+    }
+
+    /**
+     * 初始化控件
+     */
+    private void initView() {
+        // Poi搜索按钮点击事件
+        binding.fabPoi.setOnClickListener(v -> {
+            //构造query对象
+            query = new PoiSearch.Query("购物", "", cityCode);
+            // 设置每页最多返回多少条poiItem
+            query.setPageSize(10);
+            //设置查询页码
+            query.setPageNum(1);
+            //构造 PoiSearch 对象
+            try {
+                poiSearch = new PoiSearch(this, query);
+                //设置搜索回调监听
+                poiSearch.setOnPoiSearchListener(this);
+                //发起搜索附近POI异步请求
+                poiSearch.searchPOIAsyn();
+            } catch (AMapException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**
@@ -66,8 +110,33 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     private void initMap() {
         if (aMap == null) {
             aMap = binding.mapView.getMap();
+            // 创建定位蓝点的样式
+            MyLocationStyle myLocationStyle = new MyLocationStyle();
+            // 自定义定位蓝点图标
+            myLocationStyle.myLocationIcon(BitmapDescriptorFactory.fromResource(R.drawable.gps_point));
+            // 自定义精度范围的圆形边框颜色  都为0则透明
+            myLocationStyle.strokeColor(Color.argb(0, 0, 0, 0));
+            // 自定义精度范围的圆形边框宽度  0 无宽度
+            myLocationStyle.strokeWidth(0);
+            // 设置圆形的填充颜色  都为0则透明
+            myLocationStyle.radiusFillColor(Color.argb(0, 0, 0, 0));
+            // 设置定位蓝点的样式
+            aMap.setMyLocationStyle(myLocationStyle);
+            // 设置定位监听
+            aMap.setLocationSource(this);
+            // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
+            aMap.setMyLocationEnabled(true);
+            //设置最小缩放等级为12 ，缩放级别范围为[3, 20]
+            aMap.setMinZoomLevel(12);
+            // 开启室内地图
+            aMap.showIndoorMap(true);
+            // 地图控件设置
+            UiSettings uiSettings = aMap.getUiSettings();
+            // 隐藏缩放按钮
+            uiSettings.setZoomControlsEnabled(false);
+            // 显示比例尺，默认不显示
+            uiSettings.setScaleControlsEnabled(true);
         }
-
     }
 
     /**
@@ -183,6 +252,14 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
 
             // 停止定位
             stopLocation();
+            // 显示地图定位结果
+            if (mListener != null) {
+                mListener.onLocationChanged(aMapLocation);
+            }
+            // 显示浮动按钮
+            binding.fabPoi.show();
+            // 城市编码赋值
+            cityCode = aMapLocation.getCityCode();
         } else {
             // 定位失败
             showMsg("定位失败，错误：" + aMapLocation.getErrorInfo());
@@ -191,4 +268,58 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                     + aMapLocation.getErrorInfo());
         }
     }
+
+    /**
+     * 激活定位
+     * @param onLocationChangedListener
+     */
+    @Override
+    public void activate(OnLocationChangedListener onLocationChangedListener) {
+        if (mListener == null) {
+            mListener = onLocationChangedListener;
+        }
+        startLocation();
+    }
+
+    /**
+     * 禁用
+     */
+    @Override
+    public void deactivate() {
+        mListener = null;
+        if (mLocationClient != null) {
+            mLocationClient.stopLocation();
+            mLocationClient.onDestroy();
+        }
+        mLocationClient = null;
+    }
+
+    /**
+     * POI搜索返回
+     *
+     * @param poiResult POI所有数据
+     * @param i
+     */
+    @Override
+    public void onPoiSearched(PoiResult poiResult, int i) {
+        //解析result获取POI信息
+
+        //获取POI组数列表
+        ArrayList<PoiItem> poiItems = poiResult.getPois();
+        for (PoiItem poiItem : poiItems) {
+            Log.d("MainActivity", " Title：" + poiItem.getTitle() + " Snippet：" + poiItem.getSnippet());
+        }
+    }
+
+    /**
+     * POI中的项目搜索返回
+     *
+     * @param poiItem 获取POI item
+     * @param i
+     */
+    @Override
+    public void onPoiItemSearched(PoiItem poiItem, int i) {
+
+    }
+
 }
