@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/et_address"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/et_bg"
+            android:hint="请输入地址"
+            android:imeOptions="actionSearch"
+            android:paddingStart="12dp"
+            android:singleLine="true"
+            android:textColor="#000"
+            android:textSize="14sp" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <com.amap.api.maps.MapView
         android:id="@+id/map_view"
@@ -15,9 +39,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-    <!--浮动按钮-->
+    <!--浮动按钮 获取poi-->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_poi"
         android:layout_width="wrap_content"
@@ -30,5 +54,39 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:pressedTranslationZ="18dp" />
+
+    <!--浮动按钮 清空marker-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_clear_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fab_poi"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:src="@drawable/ic_clear"
+        android:visibility="invisible"
+        app:hoveredFocusedTranslationZ="18dp"
+        app:layout_constraintBottom_toTopOf="@+id/fab_poi"
+        app:layout_constraintEnd_toEndOf="@+id/fab_poi"
+        app:pressedTranslationZ="18dp" />
+
+    <!--浮动按钮 跳转路线Activity-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_route"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_toLeftOf="@+id/fab_poi"
+        android:clickable="true"
+        android:src="@drawable/ic_route"
+        app:backgroundTint="#FFF"
+        app:backgroundTintMode="screen"
+        app:fabSize="mini"
+        app:hoveredFocusedTranslationZ="18dp"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_poi"
+        app:layout_constraintEnd_toStartOf="@+id/fab_poi"
+        app:pressedTranslationZ="18dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
