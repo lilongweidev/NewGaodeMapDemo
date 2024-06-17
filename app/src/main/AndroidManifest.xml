@@ -28,6 +28,9 @@
         android:theme="@style/Theme.NewGaodeMapDemo"
         tools:targetApi="31">
         <activity
+            android:name=".RouteDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".RouteActivity"
             android:exported="false" />
         <activity

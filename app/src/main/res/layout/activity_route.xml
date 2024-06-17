@@ -8,6 +8,7 @@
     tools:context=".RouteActivity">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -27,6 +28,75 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/tv_start"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="当前所在地"
+        android:textColor="#000"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+
+    <EditText
+        android:id="@+id/et_start_address"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_toRightOf="@+id/tv_start"
+        android:background="@null"
+        android:padding="8dp"
+        android:textColor="#000"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_start"
+        app:layout_constraintTop_toTopOf="@+id/tv_start" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/et_start_address"
+        android:background="#000"
+        app:layout_constraintTop_toBottomOf="@+id/et_start_address" />
+
+    <TextView
+        android:id="@+id/tv_end"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/et_start_address"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="前往目的地"
+        android:textColor="#000"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+    <EditText
+        android:id="@+id/et_end_address"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/et_start_address"
+        android:layout_toRightOf="@+id/tv_end"
+        android:background="@null"
+        android:hint="请输入目的地"
+        android:imeOptions="actionSearch"
+        android:padding="8dp"
+        android:singleLine="true"
+        android:textColor="#000"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_end"
+        app:layout_constraintTop_toBottomOf="@+id/tv_start" />
+
+    <View
+        android:id="@+id/view2"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/et_end_address"
+        android:background="#000"
+        app:layout_constraintTop_toBottomOf="@+id/et_end_address" />
+
     <!--地图-->
     <com.amap.api.maps.MapView
         android:id="@+id/map_view"
@@ -36,5 +106,47 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+    <!--地图路线规划详情布局-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lay_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/white"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:text="距离和时间"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:drawableEnd="@drawable/ic_blue_open"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            android:text="详情"
+            android:textColor="#4c90f9"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_time"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_time" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
